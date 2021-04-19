@@ -1,0 +1,77 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(readr)
+```
+
+```{r}
+decat_analysis_datav1 <- read_csv("decathalon_cleaned_data.csv")
+```
+
+```{r}
+class (decat_analysis_datav1)
+
+```
+
+
+```{r}
+names(decat_analysis_datav1)
+```
+
+```{r}
+#Who had the longest long jump seen in the data?
+
+decat_analysis_datav1 %>% 
+  select(names, long_jump) %>% 
+  arrange(desc(long_jump)) %>% 
+  head(1)
+  
+  
+```
+```{r}
+#What was the average 100m time in each competition?
+
+decat_analysis_datav1 %>% 
+  select (`100_m`, competition) %>% 
+  group_by(competition) %>% 
+  summarise(avg = mean(`100_m`))
+ 
+
+```
+
+```{r}
+#Who had the highest total points across both competitions?
+
+decat_analysis_datav1 %>% 
+  group_by(competition, ) %>% 
+  summarise(
+            max_value = max(points, na.rm = T)
+  ) 
+
+```
+
+```{r}
+#What was the shot-put scores for the top three competitors in each competition?
+
+decat_analysis_datav1 %>% 
+  select(names, shot_put, competition) %>% 
+  group_by(competition) %>% 
+  
+  top_n(3)
+
+  #arrange(desc(shot_put)) %>% 
+  #head(3)
+
+```
+```{r}
+decat_analysis_datav1 %>% 
+select(names, shot_put, competition) %>% 
+arrange(desc(shot_put)) %>% 
+group_by(competition) %>% slice_max(1:2)
+```
+
