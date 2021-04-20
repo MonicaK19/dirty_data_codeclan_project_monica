@@ -48,10 +48,10 @@ decat_analysis_datav1 %>%
 #Who had the highest total points across both competitions?
 
 decat_analysis_datav1 %>% 
-  group_by(competition, ) %>% 
-  summarise(
-            max_value = max(points, na.rm = T)
-  ) 
+  select (names,competition, points) %>% 
+  group_by(competition) %>% 
+  slice_max(points, n = 1)
+  
 
 ```
 
@@ -59,19 +59,31 @@ decat_analysis_datav1 %>%
 #What was the shot-put scores for the top three competitors in each competition?
 
 decat_analysis_datav1 %>% 
-  select(names, shot_put, competition) %>% 
+  select (names,competition, shot_put) %>% 
   group_by(competition) %>% 
-  
-  top_n(3)
-
-  #arrange(desc(shot_put)) %>% 
-  #head(3)
-
+  slice_max(shot_put, n = 3)
 ```
 ```{r}
-decat_analysis_datav1 %>% 
-select(names, shot_put, competition) %>% 
-arrange(desc(shot_put)) %>% 
-group_by(competition) %>% slice_max(1:2)
+#What was the average points for competitors who ran the 400m 
+#in less than 50 seconds vs. those than ran 400m in more than 50 seconds?
+
+
+more_than_50 <- decat_analysis_datav1 %>% 
+  select(names, `400_m`, competition) %>% 
+  filter (`400_m` > 50.00) %>% 
+  group_by(competition) %>% 
+  summarise(avg_more_than_50 = mean(`400_m`))
+  
+more_than_50
+
+less_than_50 <- decat_analysis_datav1 %>% 
+  select(names, `400_m`, competition) %>% 
+  filter (`400_m` < 50.00) %>% 
+  group_by(competition) %>% 
+  summarise(avg_less_than_50 = mean(`400_m`))
+
+less_than_50
+
+full_join(more_than_50, less_than_50)
 ```
 
