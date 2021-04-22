@@ -62,8 +62,8 @@ different countries. The reaction is either *JOY* or *DESPAIR* or *MEH*
 ## DATA CLEANING 
 
 The first step of cleaning the data is to read the data. Depending upon the file 
-type, you can use the function. For the function to run, you would need to load 
-library
+type, you can use the function. For the function to run, you would need to install 
+package and load library.
 
 Across all the dataset, there were couple of same cleaning pattern followed. 
 These steps are mentioned below:- 

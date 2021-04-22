@@ -1,0 +1,186 @@
+---
+title: "task1_markdown"
+author: "Monica"
+date: "22/04/2021"
+output: html_document
+---
+
+## INTRODUCTION 
+### *Decathlon Data* DATASET
+
+The dataset *Decathalon_data* gives the information about the time taken by different
+player in different sports discipline. The time mentioned is in seconds and milliseconds.
+
+
+## ASSUMPTIONS
+
+None
+
+
+## DATA CLEANING 
+
+The first step of cleaning the data is to read the data. Depending upon the file 
+type, you can use the function. For the function to run, you would need to install 
+package and load library.
+
+`Reading the data`
+
+```{r eval = FALSE}
+data_clean_decathalon_v1 <- read_rds("raw_data/decathlon.rds")
+
+```
+
+
+`Getting to know the dataset by passing few functions`
+
+```{r eval = FALSE}
+
+view(data_clean_decathalon_v1)
+
+#number of rows
+nrow(data_clean_decathalon_v1)
+
+#number of columns
+ncol(data_clean_decathalon_v1)
+
+#row and column 
+dim(data_clean_decathalon_v1)
+
+#names of the column
+names(data_clean_decathalon_v1)
+
+#view of the data type
+glimpse(data_clean_decathalon_v1)
+
+#view summary
+summary(data_clean_decathalon_v1)
+
+#viewing the class
+class(data_clean_decathalon_v1)
+
+```
+
+## DATA CLEANING
+
+To use the data cleaning we would need to load the package *JANITOR* so that we 
+use functions that will help tidy the dataset.
+
+`load library`
+
+```{r eval = FALSE}
+library (janitor)
+```
+
+`cleaning dataset using functions from janitor package`
+
+```{r eval = FALSE}
+
+data_clean_decathalon_v2 <- data_clean_decathalon_v1 %>% 
+clean_names() %>% 
+rownames_to_column("names") %>% 
+mutate(names = str_to_sentence(names)) %>% 
+view(data_clean_decathalon_v2)
+glimpse(data_clean_decathalon_v2)
+```
+
+
+`Renaming the column name so that the column will be tidied`
+
+```{r eval = FALSE}
+names(data_clean_decathalon_v2)[names(data_clean_decathalon_v2) == "x100m"] <- "100_m"
+names(data_clean_decathalon_v2)[names(data_clean_decathalon_v2) == "x110m_hurdle"] <- "110_m_hurdle"
+names(data_clean_decathalon_v2)[names(data_clean_decathalon_v2) == "x400m"] <- "400_m"
+names(data_clean_decathalon_v2)[names(data_clean_decathalon_v2) == "x1500m"] <- "1500_m"
+names(data_clean_decathalon_v2)
+```
+
+
+`Writing data to csv file`
+
+```{r eval = FALSE}
+write_csv(data_clean_decathalon_v2, "decathalon_cleaned_data.csv")
+```
+
+
+## DATA WRANGLING
+
+`Loading the library`
+
+```{r eval = FALSE}
+library(tidyverse)
+library(readr)
+```
+
+`Reading the dataset using read function`
+
+```{r eval = FALSE}
+decat_analysis_datav1 <- read_csv("decathalon_cleaned_data.csv")
+decat_analysis_datav1
+```
+
+`Who had the longest long jump seen in the data?`
+
+```{r eval = FALSE}
+decat_analysis_datav1 %>% 
+  select(names, long_jump) %>% 
+  arrange(desc(long_jump)) %>% 
+  head(1)
+  
+```
+
+`What was the average 100m time in each competition?`
+
+```{r eval = FALSE}
+
+decat_analysis_datav1 %>% 
+  select (`100_m`, competition) %>% 
+  group_by(competition) %>% 
+  summarise(avg = mean(`100_m`))
+ 
+```
+
+`Who had the highest total points across both competitions?`
+
+```{r eval = FALSE}
+decat_analysis_datav1 %>% 
+  select (names,competition, points) %>% 
+  group_by(competition) %>% 
+  slice_max(points, n = 1)
+  
+```
+
+
+`What was the shot-put scores for the top three competitors in each competition?`
+
+```{r eval = FALSE}
+decat_analysis_datav1 %>% 
+  select (names,competition, shot_put) %>% 
+  group_by(competition) %>% 
+  slice_max(shot_put, n = 3)
+```
+
+`What was the average points for competitors who ran the 400m in less than 50 seconds vs. those than ran 400m in more than 50 seconds?`
+
+```{r eval = FALSE}
+more_than_50 <- decat_analysis_datav1 %>% 
+  select(names, `400_m`, competition) %>% 
+  filter (`400_m` > 50.00) %>% 
+  group_by(competition) %>% 
+  summarise(avg_more_than_50 = mean(`400_m`))
+  
+more_than_50
+
+less_than_50 <- decat_analysis_datav1 %>% 
+  select(names, `400_m`, competition) %>% 
+  filter (`400_m` < 50.00) %>% 
+  group_by(competition) %>% 
+  summarise(avg_less_than_50 = mean(`400_m`))
+
+less_than_50
+
+full_join(more_than_50, less_than_50)
+```
+
+
+
+

@@ -11,6 +11,8 @@ library(readr)
 
 ```{r}
 decat_analysis_datav1 <- read_csv("decathalon_cleaned_data.csv")
+
+decat_analysis_datav1
 ```
 
 ```{r}
