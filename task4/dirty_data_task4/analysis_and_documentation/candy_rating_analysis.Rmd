@@ -1,0 +1,229 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+```
+
+
+```{r}
+candy_rating_analysis1 <- read_csv("../clean_data/final_candy_ratings.csv", col_types = cols(`Internal ID` = col_integer(),
+  gender = col_character(),
+  country = col_character(),
+  state_county_province = col_character(),
+  date = col_date()))
+
+```
+
+
+```{r}
+
+
+view(candy_rating_analysis1)
+```
+
+```{r}
+#What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
+
+total <- candy_rating_analysis1 %>% 
+ count(reaction) 
+
+
+sum(total$n[1:3])
+
+
+
+
+```
+
+```{r}
+#What was the average age of people who are going out trick or treating and the average age of people not going trick or treating?
+
+candy_rating_analysis1 %>% 
+  select(going_trick_treat, age) %>% 
+   # filter(going_trick_treat == "Yes") %>% 
+  group_by(going_trick_treat) %>% 
+  summarise(avg = mean(age, na.rm = TRUE))
+
+
+```
+```{r}
+#For each of joy, despair and meh, which candy bar received the most of these ratings?
+
+##JOY##
+
+j <- candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  group_by(candy_category) %>% 
+  filter(reaction == "JOY") %>% 
+ summarise(joy = n()) %>% 
+  arrange(desc(joy)) %>% 
+  head(1)
+
+
+###DESPAIR###
+
+d <- candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  group_by(candy_category) %>% 
+  filter(reaction == "DESPAIR") %>% 
+ summarise(despair = n()) %>% 
+  arrange(desc(despair)) %>% 
+  head(1)
+
+
+###MEH##
+
+m <- candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  group_by(candy_category) %>% 
+  filter(reaction == "MEH") %>% 
+ summarise(meh = n()) %>% 
+  arrange(desc(meh)) %>% 
+  head(1)
+
+
+mj <-full_join(m,j)
+jdm <- full_join(mj,d, by = "candy_category")
+
+jdm
+```
+
+
+```{r}
+#How many people rated Starburst as despair?
+candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  filter(candy_category == "Starburst" & reaction == "DESPAIR") %>% 
+  count()
+
+
+
+```
+
+```{r}
+#For the next three questions, count despair as -1, joy as +1 and meh as 0.
+
+candy_rating_analysis2 <- candy_rating_analysis1 %>%
+  #select(candy_category, reaction) %>% 
+  mutate(reaction_score = case_when(
+                                    reaction == "JOY" ~ 1,
+                                    reaction == "DESPAIR" ~-1,
+                                    reaction == "MEH" ~ 0
+  ),.after = reaction)
+candy_rating_analysis2
+  
+```
+
+```{r}
+#What was the most popular candy bar by this rating system for each gender in the dataset?
+
+##Male##
+
+#j1 <- candy_rating_analysis2 %>% 
+  #select(candy_category, reaction_score, gender) %>% 
+  #group_by(candy_category, gender) %>% 
+  #filter(reaction_score == "1" & gender == "Male") %>% 
+ #summarise(score_1 = n()) %>% 
+##arrange(desc(score_1)) %>% 
+  #head(1)
+#j1
+
+#Female#
+#candy_rating_analysis2 %>% 
+ # select(candy_category, reaction_score, gender) %>% 
+  #group_by(candy_category, gender) %>% 
+ # filter(reaction_score == "1" & gender == "Female") %>% 
+ #summarise(score_1 = n()) %>% 
+  #arrange(desc(score_1)) %>% 
+ # head(1)
+
+#Other#
+#candy_rating_analysis2 %>% 
+ # select(candy_category, reaction_score, gender) %>% 
+ # group_by(candy_category, gender) %>% 
+ # filter(reaction_score == "1" & gender == "Other") %>% 
+ #summarise(score_1 = n()) %>% 
+ # arrange(desc(score_1)) %>% 
+ # head(1)
+
+#Prefer not to say#
+#candy_rating_analysis2 %>% 
+ # select(candy_category, reaction_score, gender) %>% 
+ # group_by(candy_category, gender) %>% 
+ # filter(reaction_score == "1" & gender == "I'd rather not say") %>% 
+ #summarise(score_1 = n()) %>% 
+ # arrange(desc(score_1)) %>% 
+ # head(1)
+
+```
+
+```{r}
+
+candy_rating_analysis2 %>% 
+  distinct(gender)
+```
+
+
+```{r}
+#What was the most popular candy bar in each year?
+
+#candy_rating_analysis2 %>% 
+  #select(date, reaction_score ) %>% 
+  #group_by(as.numeric(format(date,'%Y'))) %>% 
+   #filter(reaction_score == 1) %>% 
+  #summarise(count = n(), na.rm = TRUE)
+
+
+ #%>% 
+ #class(candy_rating_analysis2$date)
+```
+
+
+```{r}
+#What was the most popular candy bar by this rating system for each gender in the dataset?
+candy_rating_analysis2 %>% 
+  group_by(gender, candy_category) %>% 
+  summarise(popular = mean(reaction_score, na.rm = TRUE)) %>% 
+  slice_max(popular, n=1) %>% 
+  arrange(desc(popular))
+ 
+
+
+```
+```{r}
+#What was the most popular candy bar in each year?
+
+candy_rating_analysis2 %>% 
+  mutate(new = as.numeric(format(date,'%Y'))) %>% 
+  distinct(new)
+
+candy_rating_analysis2 %>% 
+  distinct (date)
+
+
+candy_rating_analysis2 %>% 
+  mutate(date = as.numeric(format(date,'%Y'))) %>% 
+  group_by(date, candy_category) %>% 
+  summarise(popular = mean(reaction_score, na.rm = TRUE)) %>% 
+  slice_max(popular, n=1) %>% 
+  arrange(desc(popular))
+```
+
+```{r}
+
+#What was the most popular candy bar by this rating for people in US, Canada, UK and all other countries?
+
+candy_rating_analysis2 %>% 
+  group_by(country, candy_category) %>% 
+  summarise(popular = mean(reaction_score, na.rm = TRUE)) %>% 
+  filter(country == "USA"| country == "UK" | country == "Canada") %>% 
+  slice_max(popular, n=1) %>% 
+  arrange(desc(popular))
+
+
+```
+

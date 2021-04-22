@@ -1,4 +1,5 @@
 library(readxl)
+library(readr)
 library(tidyverse)
 
 
@@ -108,3 +109,5 @@ data_boing_candy_2015v4 <- data_boing_candy_2015v3 %>%
 
 nrow(data_boing_candy_2015v4)
 names(data_boing_candy_2015v4)
+
+view(data_boing_candy_2016v3)

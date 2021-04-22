@@ -1,0 +1,370 @@
+---
+title: "dirty_data_project_task4"
+author: "Monica"
+date: "22/04/2021"
+output: html_document
+---
+
+## INTRODUCTION 
+### *CANDY_RANKING_DATA* DATASET
+
+The dataset for the the dirty project consists of 3 files excel files. Each file
+had the data for the year 2015, 2016, 2017 respectively.The three datasets 
+had columns which were either present in all the three dataset or just one dataset. 
+However, at any given point atleast one column was common amongst any two dataset. 
+The motive of this project is to do date cleaning and data wrangling. 
+Below are the steps taken to present the final dataset in a form that is tidy and 
+the user can do analysis of the candy ratings. The records mainly contains a reaction 
+on different kinds of candies. The customer is of various age group and also from
+different countries. The reaction is either *JOY* or *DESPAIR* or *MEH*
+
+
+## ASSUMPTIONS
+
+#### boing_boing_candy_dataset_2015
+
+1. The timestamp needs to be divided into 2 columns namely - date and time.
+2. The name of the column needs to be small and readable
+3. Irrelevant columns/rows which doesn't have any information regarding the candy
+   ratings should be removed completely from the table.
+4. Column age which has information other than number should be replaced with NA. Also,
+   values in the age column should be between 0 and 100.
+5. Any reaction other than *JOY* or *DESPAIR* should be NA.
+
+
+#### boing_boing_candy_dataset_2016
+
+1. The timestamp needs to be divided into 2 columns namely - date and time.
+2. The name of the column needs to be small and readable
+3. Irrelevant columns/rows which doesn't have any information regarding the candy
+   ratings should be removed completely from the table.
+4. Column age which has information other than number should be replaced with NA. Also,
+   values in the age column should be between 0 and 100.
+5. Any reaction other than *JOY* or *DESPAIR* or *MEH* should be NA. 
+6. Country column should be in the same case for the values which means the same.
+7. Shortforms of certain province/county should be put as full name.
+
+
+#### boing_boing_candy_dataset_2017
+
+1. The timestamp needs to be divided into 2 columns namely - date and time.
+2. The name of the column needs to be small and readable
+3. Irrelevant columns/rows which doesn't have any information regarding the candy
+   ratings should be removed completely from the table.
+4. Column age which has information other than number should be replaced with NA. Also,
+   values in the age column should be between 0 and 100.
+5. Any reaction other than *JOY* or *DESPAIR* should be NA. 
+6. Country column should be in the same case for the values which means the same.
+7. Shortforms of certain province/county should be put as full name.
+
+
+
+## DATA CLEANING 
+
+The first step of cleaning the data is to read the data. Depending upon the file 
+type, you can use the function. For the function to run, you would need to load 
+library
+
+Across all the dataset, there were couple of same cleaning pattern followed. 
+These steps are mentioned below:- 
+
+`Separate column *Timestamp* into *date* and *time*`
+
+```{r eval = FALSE}
+data_boing_candy_2015v1 <- data_boing_candy_2015 %>% 
+  separate(Timestamp, c("date", "time"), sep = " " )
+class(data_boing_candy_2015v1)
+```
+
+
+`Changing column names`
+
+```{r eval = FALSE}
+
+names(data_boing_candy_2015v1)[names(data_boing_candy_2015v1) == "How old are you?"] <- "age"
+names(data_boing_candy_2015v1)[names(data_boing_candy_2015v1) == "Are you going actually going trick or treating yourself?"] <- "going_trick_treat"
+names(data_boing_candy_2015v1)[names(data_boing_candy_2015v1) == "Please leave any remarks or comments regarding your choices."] <- "comments"
+
+```
+
+
+`Removing irrelevant columns which will not affect the candy ratings`
+
+```{r eval = FALSE}
+data_boing_candy_2016v1$`Please list any items not included above that give you JOY.` <- NULL
+data_boing_candy_2016v1$`[York Peppermint Patties] Ignore` <- NULL
+data_boing_candy_2016v1$`Please leave any witty, snarky or thoughtful remarks or comments regarding your choices.` <- NULL
+data_boing_candy_2016v1$`Guess the number of mints in my hand.` <- NULL
+data_boing_candy_2016v1$`Betty or Veronica?` <- NULL
+```
+
+`Replacing the unacceptable value of age with NA`
+
+```{r eval = FALSE}
+options(scipen = 9999)
+data_boing_candy_2016v1$age <- as.integer(as.character(data_boing_candy_2016v1$age))
+```
+
+`Making table longer to have minimum column and compact table`
+
+```{r eval = FALSE}
+data_boing_candy_2016v2 <- data_boing_candy_2016v1 %>%
+  pivot_longer(cols = `[100 Grand Bar]`:`[York Peppermint Patties]`,
+               names_to = "candy_category", 
+               values_to = "reaction") 
+```
+
+
+`Tidying of the column country - putting same values that meant same. Representing`
+`only few lines code `
+
+```{r eval = FALSE}
+
+data_boing_candy_2016v3 <- data_boing_candy_2016v2 %>% 
+  mutate(country = recode(country, "usa" = "USA", "us" = "USA", "US" =  "USA", "Usa" = "USA",
+                          "America" = "USA", "United States of America" = "USA",
+                          "United States" = "USA", "USA!!!!!!" = "USA", 
+                          "uSA" = "USA", "united states" = "USA", 
+                          "USA USA USA USA" = "USA", "america" = "USA",
+                          "netherlands" = "Netherlands", "kenya" = "Kenya", 
+                          "USA (I think but it's an election year so who can really tell)" = "USA",
+                          "USA!" = "USA", "Units States" = "Units States", "U.S." = "USA",
+                          "United states" = "USA", "USA USA USA" = "USA", "USA! USA! USA!" = "USA",
+                          "United Kingdom" = "UK", "United Kindom" = "UK", "Units States" = "USA", 
+                          "the best one - usa" = "USA",
+                          ))
+
+```
+
+
+`tidying the state_county_province column by replacing short names with the full names`
+
+```{r eval = FALSE}
+data_boing_candy_2016v4 <- data_boing_candy_2016v3 %>% 
+  mutate(state_county_province = recode(state_county_province, "il" = "Illinois",
+                                        "PA" = "Pennsylvania", "IN" = "Indiana",
+                                        "the Mitten" = "Michigan"))
+```
+
+`Replacing "NA" with NA. The unwanted column values were initially recoded to string NA.`
+
+```{r eval = FALSE}
+data_boing_candy_2016v5  <- data_boing_candy_2016v4 %>% 
+  mutate(country = replace_na("NA"))
+```
+
+`Replacing the string which contains punctuations. The values in the candy_category`
+`were encapsulated with square bracket which had to be cleaned`
+
+```{r eval = FALSE}
+data_boing_candy_2016v6 <- data_boing_candy_2016v5 %>% 
+  mutate(candy_category = str_replace_all(candy_category, "[[:punct:]]", ""))
+```
+
+
+`This code will accept age between 0 and 100`
+
+```{r eval = FALSE}
+data_boing_candy_2016v7 %>% 
+  mutate(age = if_else(age < 0 | age > 100, NA_integer_, age)) %>% 
+  filter(age>100)
+
+```
+
+
+## DATA MERGING
+
+`The three clean datasets were merged into one dataset which will be used for` 
+`analysis purpose. This *final_candy_ratings* was then written as csv file. This`
+`file is stored in the *clean_data* folder`
+
+```{r eval = FALSE}
+
+data_2015_2017 <- bind_rows(data_boing_candy_2015v5,data_boing_candy_2017v5)
+
+data_2015_2017_2016 <- bind_rows(data_2015_2017,data_boing_candy_2016v7)
+
+final_candy_ratings <- write_csv(data_2015_2017_2016,"final_candy_ratings.csv")
+
+```
+
+
+
+## TASK QUESTION AND ANALYSIS
+
+Once the cleaned data is ready, we can read the dataset and start analysing the 
+values. Here are few questions and the code.
+
+`Loading the library`
+
+```{r eval = FALSE}
+library(tidyverse)
+library(readr)
+```
+
+`Reading the dataset and passing the data types for the column`
+
+```{r eval = FALSE}
+candy_rating_analysis1 <- read_csv("../clean_data/final_candy_ratings.csv", col_types = cols(`Internal ID` = col_integer(),
+  gender = col_character(),
+  country = col_character(),
+  state_county_province = col_character(),
+  date = col_date()))
+```
+
+`What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)`
+
+```{r eval = FALSE}
+
+total <- candy_rating_analysis1 %>% 
+ count(reaction) 
+sum(total$n[1:3])
+```
+
+
+`What was the average age of people who are going out trick or treating and the average age of people not going trick or treating?`
+
+```{r eval = FALSE}
+
+candy_rating_analysis1 %>% 
+  select(going_trick_treat, age) %>% 
+  group_by(going_trick_treat) %>% 
+  summarise(avg = mean(age, na.rm = TRUE))
+
+```
+
+
+`For each of joy, despair and meh, which candy bar received the most of these ratings?`
+
+```{r eval = FALSE}
+
+##JOY##
+
+j <- candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  group_by(candy_category) %>% 
+  filter(reaction == "JOY") %>% 
+ summarise(joy = n()) %>% 
+  arrange(desc(joy)) %>% 
+  head(1)
+
+
+###DESPAIR###
+
+d <- candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  group_by(candy_category) %>% 
+  filter(reaction == "DESPAIR") %>% 
+ summarise(despair = n()) %>% 
+  arrange(desc(despair)) %>% 
+  head(1)
+
+
+###MEH##
+
+m <- candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  group_by(candy_category) %>% 
+  filter(reaction == "MEH") %>% 
+ summarise(meh = n()) %>% 
+  arrange(desc(meh)) %>% 
+  head(1)
+
+
+mj <-full_join(m,j)
+jdm <- full_join(mj,d, by = "candy_category")
+
+jdm
+```
+
+`How many people rated Starburst as despair?`
+
+```{r eval = FALSE}
+
+candy_rating_analysis1 %>% 
+  select(candy_category, reaction) %>% 
+  filter(candy_category == "Starburst" & reaction == "DESPAIR") %>% 
+  count()
+```
+
+
+`What was the most popular candy bar in each year?`
+```{r eval = FALSE}
+
+candy_rating_analysis2 %>% 
+  mutate(date = as.numeric(format(date,'%Y'))) %>% 
+  group_by(date, candy_category) %>% 
+  summarise(popular = mean(reaction_score, na.rm = TRUE)) %>% 
+  slice_max(popular, n=1) %>% 
+  arrange(desc(popular))
+
+```
+
+
+`For the next three questions, count despair as -1, joy as +1 and meh as 0.`
+
+```{r eval = FALSE}
+
+candy_rating_analysis2 <- candy_rating_analysis1 %>%
+  #select(candy_category, reaction) %>% 
+  mutate(reaction_score = case_when(
+                                    reaction == "JOY" ~ 1,
+                                    reaction == "DESPAIR" ~-1,
+                                    reaction == "MEH" ~ 0
+  ),.after = reaction)
+candy_rating_analysis2
+```
+
+
+`What was the most popular candy bar by this rating for people in US, Canada, UK and all other countries?`
+
+
+```{r eval = FALSE}
+
+candy_rating_analysis2 %>% 
+  group_by(country, candy_category) %>% 
+  summarise(popular = mean(reaction_score, na.rm = TRUE)) %>% 
+  filter(country == "USA"| country == "UK" | country == "Canada") %>% 
+  slice_max(popular, n=1) %>% 
+  arrange(desc(popular))
+
+
+```
+
+
+`What was the most popular candy bar in each year?`
+
+```{r eval = FALSE}
+
+candy_rating_analysis2 %>% 
+  mutate(new = as.numeric(format(date,'%Y'))) %>% 
+  distinct(new)
+
+candy_rating_analysis2 %>% 
+  distinct (date)
+
+
+candy_rating_analysis2 %>% 
+  mutate(date = as.numeric(format(date,'%Y'))) %>% 
+  group_by(date, candy_category) %>% 
+  summarise(popular = mean(reaction_score, na.rm = TRUE)) %>% 
+  slice_max(popular, n=1) %>% 
+  arrange(desc(popular))
+```
+
+
+`What was the most popular candy bar by this rating system for each gender in the dataset?`
+
+```{r eval = FALSE}
+
+candy_rating_analysis2 %>% 
+  group_by(gender, candy_category) %>% 
+  summarise(popular = mean(reaction_score, na.rm = TRUE)) %>% 
+  slice_max(popular, n=1) %>% 
+  arrange(desc(popular))
+ 
+
+
+```
+
+
