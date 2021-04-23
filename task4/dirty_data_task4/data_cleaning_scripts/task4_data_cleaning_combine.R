@@ -13,7 +13,7 @@ library(stringr)
 data_boing_candy_2015 <- read_xlsx("raw_data/boing-boing-candy-2015.xlsx")
 
 ###FUNCTIONS TO UNDERSTAND THE DATASET###
-#view(data_boing_candy_2015)
+view(data_boing_candy_2015)
 glimpse(data_boing_candy_2015)
 names(data_boing_candy_2015)
 class(data_boing_candy_2015)
@@ -23,8 +23,6 @@ class(data_boing_candy_2015)
 data_boing_candy_2015v1 <- data_boing_candy_2015 %>% 
   separate(Timestamp, c("date", "time"), sep = " " )
 class(data_boing_candy_2015v1)
-
-
 
 ###CHANGING COLUMN NAMES###
 
@@ -105,21 +103,7 @@ na_if(data_boing_candy_2015v3$age,0)
 
 data_boing_candy_2015v4 <- data_boing_candy_2015v3 %>% 
   mutate(candy_category = str_replace_all(candy_category, "[:punct:]", ""))
-#view(data_boing_candy_2015v4)
-
-
-### TIDYING THE AGE COLUMN###
-
-
-data_boing_candy_2015v5 <- data_boing_candy_2015v4 %>% 
-mutate(age = if_else(age < 0 | age > 100, NA_integer_, age)) 
- #%>% 
-  #filter(age>100)
-
-view(data_boing_candy_2015v5)
-
-#data_boing_candy_2015v4 %>% 
- # filter(age>100)
+view(data_boing_candy_2015v4)
 ################################################################################
 
 
@@ -132,7 +116,7 @@ data_boing_candy_2016 <- read_xlsx("raw_data/boing-boing-candy-2016.xlsx")
 
 ###FUNCTIONS TO UNDERSTAND THE DATASET###
 
-#view(data_boing_candy_2016)
+view(data_boing_candy_2016)
 glimpse(data_boing_candy_2016)
 names(data_boing_candy_2016)
 
@@ -225,7 +209,7 @@ data_boing_candy_2016v3 <- data_boing_candy_2016v2 %>%
 
 ###TIDYING THE COLUMN NAME BY GIVING THE FULL NAME###
 
-data_boing_candy_2016v4 <- data_boing_candy_2016v3 %>% 
+data_boing_candy_2016v3 <- data_boing_candy_2016v3 %>% 
   mutate(state_county_province = recode(state_county_province, "il" = "Illinois",
                                         "PA" = "Pennsylvania", "IN" = "Indiana",
                                         "the Mitten" = "Michigan"))
@@ -234,14 +218,14 @@ data_boing_candy_2016v4 <- data_boing_candy_2016v3 %>%
 
 ###REPLACING "NA" WITH NA###
 
-data_boing_candy_2016v5  <- data_boing_candy_2016v4 %>% 
+data_boing_candy_2016v3 %>% 
   mutate(country = replace_na("NA"))
 #view(data_boing_candy_2016v3)
 
 
 ###REMOVING THE SQUARE BRACKETS FROM THE CANDY_CATEGORY COLUMN###
 
-data_boing_candy_2016v6 <- data_boing_candy_2016v5 %>% 
+data_boing_candy_2016v3 <- data_boing_candy_2016v3 %>% 
   mutate(candy_category = str_replace_all(candy_category, "[[:punct:]]", ""))
 #view(data_boing_candy_2016v3)
 
@@ -249,23 +233,13 @@ data_boing_candy_2016v6 <- data_boing_candy_2016v5 %>%
 
 ###TIDYING THE COLUMN STATE_COUNTY_PROVINCE###
 
-data_boing_candy_2016v7 <- data_boing_candy_2016v6 %>% 
+data_boing_candy_2016v3 <- data_boing_candy_2016v3 %>% 
   mutate(state_county_province = recode(state_county_province, "7940.0" = "NA"))
-#view(data_boing_candy_2016v3)
-
-
-### TIDYING THE AGE COLUMN###
-
-
-data_boing_candy_2016v7 %>% 
-  mutate(age = if_else(age < 0 | age > 100, NA_integer_, age)) %>% 
-  filter(age>100)
-
-#view(data_boing_candy_2016v3)
+view(data_boing_candy_2016v3)
 
 ################################################################################
 
-#############################BOING_BOING_CANDY_2017 DATA CLEANING###############
+#############################BOING_BOING_CANDY_2016 DATA CLEANING###############
 
 ###READING THE DATA####
 
@@ -273,7 +247,7 @@ data_boing_candy_2017 <- read_xlsx("raw_data/boing-boing-candy-2017.xlsx")
 
 ###FUNCTIONS TO UNDERSTAND THE DATASET###
 
-#view(data_boing_candy_2017)
+view(data_boing_candy_2017)
 glimpse(data_boing_candy_2017)
 names(data_boing_candy_2017)
 
@@ -323,7 +297,7 @@ data_boing_candy_2017v2 <- data_boing_candy_2017v1 %>%
 
 options(scipen = 9999)
 data_boing_candy_2017v2$age <- as.integer(as.character(data_boing_candy_2017v2$age))
-#view(data_boing_candy_2017v2)
+view(data_boing_candy_2017v2)
 
 
 ###REPLACING UNWANTED VALUES WITH NA###
@@ -369,26 +343,21 @@ data_boing_candy_2017v4 <- data_boing_candy_2017v3 %>%
                           "insanity lately" = "NA", "subscribe to dm4uz3 on youtube" = "NA", "UD" = "NA"
   ))
 
-data_boing_candy_2017v5 <- data_boing_candy_2017v4 %>% 
-  mutate(date = "2017-01-01")
-
-view(data_boing_candy_2017v5)
+view(data_boing_candy_2017v4)
 ################################################################################
 
 
 ###########################MERGING DATASET######################################
 
-data_2015_2017 <- bind_rows(data_boing_candy_2015v5,data_boing_candy_2017v5)
+data_2015_2017 <- bind_rows(data_boing_candy_2015v4,data_boing_candy_2017v4)
 
-#view(data_2015_2017)
+view(data_2015_2017)
 
-data_2015_2017_2016 <- bind_rows(data_2015_2017,data_boing_candy_2016v7)
+data_2015_2017_2016 <- bind_rows(data_2015_2017,data_boing_candy_2016v3)
 
-#view(data_2015_2017_2016)
+view(data_2015_2017_2016)
 
 ###write the csv file###
 
 final_candy_ratings <- write_csv(data_2015_2017_2016,"final_candy_ratings.csv")
-
-
 ################################################################################
